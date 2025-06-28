@@ -1,4 +1,4 @@
-* {
+/* * {
   margin: 0;
   padding: 0;
 }
@@ -60,7 +60,7 @@ body {
     background-color: #333;
     color: aliceblue;
     padding: 5px;
-} */
+} 
 
 .friends-container {
     position: fixed;
@@ -93,4 +93,358 @@ body {
 .friend-info:hover {
     background: rgba(255, 255, 255, 0.05);
     transform: translateY(-2px);
+} */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 120px; /* Space for fixed bottom bar */
+}
+
+.header {
+  width: 100%;
+  background-color: #333;
+  color: white;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.header p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.content {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content p {
+  margin-bottom: 16px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.contacts-section {
+  margin: 20px 0;
+}
+
+.contacts-section button {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.contacts-section button:hover {
+  background: #0056cc;
+}
+
+.contacts-section ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  list-style-type: none;
+  padding: 0;
+}
+
+.contacts-section li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contacts-section li button {
+  background: #f0f0f0;
+  color: #333;
+  padding: 8px 16px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.map-section {
+  width: 100%;
+  margin: 20px 0;
+  padding: 16px;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.map-section h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.map-placeholder {
+  color: #666;
+  font-style: italic;
+}
+
+#map {
+  width: 100%;
+  height: 300px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.friends-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(40, 40, 40, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 16px 12px 34px 12px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  overflow-x: auto;
+  gap: 8px;
+}
+
+.friend-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px;
+  border-radius: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.friend-info:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.friend-info.active {
+  background: rgba(0, 122, 255, 0.15);
+  border-top: 1px solid rgba(0, 122, 255, 0.4);
+  border-bottom: 1px solid rgba(0, 122, 255, 0.3);
+}
+
+.friend-name {
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friend-info.active .friend-name {
+  color: #64b5f6;
+}
+
+/* Tablet styles */
+@media (min-width: 768px) {
+  .header {
+    padding: 30px 24px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .header p {
+    font-size: 16px;
+  }
+
+  .content {
+    padding: 24px;
+  }
+
+  .content p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  #map {
+    height: 400px;
+  }
+
+  .contacts-section ul {
+    gap: 16px;
+  }
+
+  .friends-container {
+    padding: 20px 16px 34px 16px;
+    gap: 12px;
+  }
+
+  .friend-info {
+    padding: 12px;
+    min-width: 70px;
+  }
+
+  .friend-name {
+    font-size: 12px;
+    max-width: 70px;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1024px) {
+  body {
+    padding-bottom: 100px;
+  }
+
+  .header {
+    padding: 40px 32px;
+  }
+
+  .header h1 {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+
+  .header p {
+    font-size: 18px;
+  }
+
+  .content {
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .right-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #map {
+    height: 500px;
+  }
+
+  .friends-container {
+    justify-content: center;
+    gap: 20px;
+    max-width: 800px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px 20px 0 0;
+  }
+
+  .friend-info {
+    padding: 16px;
+    min-width: 80px;
+  }
+
+  .friend-name {
+    font-size: 13px;
+    max-width: 80px;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1440px) {
+  .content {
+    max-width: 1400px;
+    padding: 40px;
+  }
+
+  #map {
+    height: 600px;
+  }
+}
+
+/* Handle very small screens */
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .header p {
+    font-size: 12px;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  .content p {
+    font-size: 13px;
+  }
+
+  #map {
+    height: 250px;
+  }
+
+  .friends-container {
+    padding: 12px 8px 30px 8px;
+    gap: 4px;
+  }
+
+  .friend-info {
+    padding: 6px;
+    min-width: 50px;
+  }
+
+  .friend-name {
+    font-size: 10px;
+    max-width: 50px;
+  }
+}
+
+/* Landscape phone orientation */
+@media (max-height: 500px) and (orientation: landscape) {
+  .header {
+    padding: 16px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  #map {
+    height: 200px;
+  }
+
+  body {
+    padding-bottom: 80px;
+  }
+
+  .friends-container {
+    padding: 12px 8px 20px 8px;
+  }
 }

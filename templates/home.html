@@ -5,6 +5,59 @@
 </div>
 
 <main class="content">
+  <div class="left-column">
+    <div>
+      <p>
+        Welcome to my simple HTML page. This page is designed to demonstrate
+        basic HTML structure and styling.
+      </p>
+      <p>Feel free to modify the content and styles as you wish!</p>
+    </div>
+
+    <div class="contacts-section">
+      <button>Add Contact</button>
+      <ul>
+        <li><button>Placeholder</button> -</li>
+        <li><button>Placeholder</button> -</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="right-column">
+    <div class="map-section">
+      <h2>Map View</h2>
+      <div class="map-placeholder">
+        <p>[Map showing contact locations]</p>
+      </div>
+      <div id="map"></div>
+    </div>
+  </div>
+</main>
+
+<div class="friends-container">
+  {% for x in friends %}
+  <div class="friend-info">
+    <div
+      class="friend-name"
+      data-id="{{ x.id }}"
+      data-lat="{{ x.lat }}"
+      data-lng="{{ x.lng }}"
+    >
+      {{ x.name }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}
+
+
+{% comment %} {% extends "base.html" %} {% block content %}
+<div class="header">
+  <h1>Weather Safety Application</h1>
+  <p>Keep track of your loved ones through any weather</p>
+</div>
+
+<main class="content">
   <p>
     Welcome to my simple HTML page. This page is designed to demonstrate basic
     HTML structure and styling.
@@ -28,14 +81,17 @@
   <div id="map"></div>
   <div class="friends-container">
     {% for x in friends %}
-      <div class="friend-info">
-        <div class="friend-name" 
-        data-id="{{ x.id }}" 
-        data-lat="{{ x.lat }}" 
-        data-lng="{{ x.lng }}">
-        {{ x.name }}</div>
+    <div class="friend-info">
+      <div
+        class="friend-name"
+        data-id="{{ x.id }}"
+        data-lat="{{ x.lat }}"
+        data-lng="{{ x.lng }}"
+      >
+        {{ x.name }}
       </div>
+    </div>
     {% endfor %}
   </div>
 </main>
-{% endblock content %}
+{% endblock content %} {% endcomment %}
