@@ -19,8 +19,17 @@
 
 }
 
-.contacts ul {
+.contacts-section ul {
     display: flex;
     list-style-type: none;
     padding: 0;
+}
+
+.map-section {
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    align-items: center;
+    text-align: center;
 }
