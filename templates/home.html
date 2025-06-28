@@ -71,13 +71,13 @@
       <li><button>Placeholder</button> -</li>
     </ul>
   </div>
+
   <div class="map-section">
     <h2>Map View</h2>
-    <div class="map-placeholder">
-      <!-- Replace this with a real map API integration like Leaflet or Google Maps -->
-      <p>[Map showing contact locations]</p>
-    </div>
+    <div id="map" style="height: 400px; width: 100%; border: 1px solid #ccc;"></div>
   </div>
+</main>
+{% endblock content %}
   <div id="map"></div>
   <div class="friends-container">
     {% for x in friends %}
