@@ -42,6 +42,8 @@ INSTALLED_APPS = [
 
     # own apps
     'pages',
+    'core',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
