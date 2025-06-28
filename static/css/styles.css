@@ -1,40 +1,96 @@
 * {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .header {
-    width: 100%;
-    background-color: #333;
-    color: white;
-    padding: 25px;
-    text-align: center;
+  width: 100%;
+  background-color: #333;
+  color: white;
+  padding: 25px;
+  text-align: center;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  height: 100vh;
 }
 
 .content {
-    padding: 10px 20px 30px;
-    margin-top: 10px;
-    width: 100%;
-    justify-content: space-between;
-
+  padding: 10px 20px 30px;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: space-between;
 }
 
 .contacts-section ul {
-    display: flex;
-    list-style-type: none;
-    padding: 0;
+  display: flex;
+  list-style-type: none;
+  padding: 0;
 }
 
 .map-section {
-    width: 100%;
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    align-items: center;
-    text-align: center;
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  align-items: center;
+  text-align: center;
 }
 
 #map {
+  width: 100%;
+  height: 400px;
+}
+
+/* #friend-list {
+    margin-top: 20px;
+    width: 100vw;
+    height: 25%;
+    background-color: #333;
+    display: grid;
+    list-style-type: none;
+    padding: 5px;
+}
+
+.friend {
     width: 100%;
-    height: 400px;
+    height: 10%;
+    border: 1px solid black;
+    background-color: #333;
+    color: aliceblue;
+    padding: 5px;
+} */
+
+.friends-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(40, 40, 40, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 20px 16px 34px 16px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.friend-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 8px;
+    border-radius: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    color : white;
+}
+
+.friend-info:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
 }

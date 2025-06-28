@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="header">
   <h1>Weather Safety Application</h1>
   <p>Keep track of your loved ones through any weather</p>
@@ -27,5 +26,16 @@
     </div>
   </div>
   <div id="map"></div>
+  <div class="friends-container">
+    {% for x in friends %}
+      <div class="friend-info">
+        <div class="friend-name" 
+        data-id="{{ x.id }}" 
+        data-lat="{{ x.lat }}" 
+        data-lng="{{ x.lng }}">
+        {{ x.name }}</div>
+      </div>
+    {% endfor %}
+  </div>
 </main>
 {% endblock content %}
