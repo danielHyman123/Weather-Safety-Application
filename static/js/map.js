@@ -155,6 +155,7 @@ map.on("moveend", () => {
     }, 400);
 });
 
+// Handle existing friends from Django template
 let friends = document.getElementsByClassName('friend-name');
 for (let i = 0; i < friends.length; i++) {
     let friend = friends[i];
@@ -163,10 +164,16 @@ for (let i = 0; i < friends.length; i++) {
         .openPopup();
     friend.addEventListener('click', (event) => {
         goToFriend(event, map, friend.dataset.lat, friend.dataset.lng);
-    })
+    });
 }
 
-function goToFriend(event, map, lat, lng) {
-    let friend = event.target;
-    map.setView([lat, lng], 15);
+// Function to zoom to location
+function goToFriend(event, mapInstance, lat, lng) {
+    mapInstance.setView([lat, lng], 15);
+}
+
+
+function addFriend() {
+    const name = document.getElementById('name').value;
+    const friends = document.getElementById('category').value;
 }
