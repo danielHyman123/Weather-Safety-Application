@@ -1,4 +1,9 @@
-KONTUR_API_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJjZDhoWXJtTUxpa1RGTUNaa0NGY1lxOTZPWm9hRE1LajZua2gza18wZ0FRIn0.eyJleHAiOjE3NTEzODMyMjcsImlhdCI6MTc1MTEyNDAyNywianRpIjoiYmNjNWFlNzUtMWVkNi00ZjI4LThjN2QtY2MyOTVlNDFiZTBlIiwiaXNzIjoiaHR0cHM6Ly9rZXljbG9hazAxLmtvbnR1ci5pby9yZWFsbXMva29udHVyIiwiYXVkIjpbImV2ZW50LWFwaSIsImFjY291bnQiXSwic3ViIjoiZjpiMzM1ZThiYS0yMWVhLTQzMmUtODViZi1jNzhjNWJlODEzMWU6ZGFuaWVsaHltYW4yMEBnbWFpbC5jb20iLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJrb250dXJfcGxhdGZvcm0iLCJzZXNzaW9uX3N0YXRlIjoiM2NiZTY0OGEtZDgyMy00ODI2LWJjMjUtMmQwMzE2NjE5NTMzIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHBzOi8vcHJvZC1kaXNhc3Rlci1uaW5qYS5rb250dXJsYWJzLmNvbSIsImh0dHBzOi8vZGlzYXN0ZXIubmluamEiLCJodHRwczovL2FwcHMua29udHVyLmlvIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIiwiRVZFTlRBUElfcmVhZDpmZWVkOmtvbnR1ci1wdWJsaWMiXX0sInJlc291cmNlX2FjY2VzcyI6eyJldmVudC1hcGkiOnsicm9sZXMiOlsicmVhZDpmZWVkOmtvbnR1ci1wdWJsaWMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInNpZCI6IjNjYmU2NDhhLWQ4MjMtNDgyNi1iYzI1LTJkMDMxNjYxOTUzMyIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiRGFuaWVsIEh5bWFuIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZGFuaWVsaHltYW4yMEBnbWFpbC5jb20iLCJnaXZlbl9uYW1lIjoiRGFuaWVsIEh5bWFuIiwiZmFtaWx5X25hbWUiOiIiLCJlbWFpbCI6ImRhbmllbGh5bWFuMjBAZ21haWwuY29tIiwidXNlcm5hbWUiOiJkYW5pZWxoeW1hbjIwQGdtYWlsLmNvbSJ9.rO2Oc0fj4P1ZjZGjTFwrd6bcqb1kesmtP7stkypyFDa76SB9j4vD9qjLJh2hYtspUffxIGHUwGmU9ocNE7vPLPrjf5OZ0TXYE0jG9aSOaR5YrmGbx_4BzlKXaHgMVVndYYbO2STl0RgqWfPkxRWqAeIY87QuP2lTk9lyPIKIMDqym1iyjXvWEKp0VpeviaZy7MKb4LfoXovZRhADtmKodwdoU6SF0L0tZp_Rpt7Uk-jFmaHrD5T8ttLCJJdncg0Iq88VPmKZ4AImaU_ecoSqcvH_AD7bCSUPo7FCnPFhd9rTBqSzoTM1Xw7ldW4XaSl3fNmHSrTi6rD2M2uwlcltww"
+// Fetch the config file
+async function loadConfig() {
+    const response = await fetch('/static/js/config.json');
+    const config = await response.json();
+    return config.KONTUR_API_TOKEN;
+}
 
 /* ─────────────────────────
    1. Map boot‑strap
@@ -13,9 +18,8 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 const disasterLayer = L.layerGroup().addTo(map);
 
-/* ─────────────────────────
-   2. Utility helpers
-   ───────────────────────── */
+
+//   2. Utility helpers
 function getDisasterColor(type = "") {
     const t = type.toLowerCase();
     if (t.includes("flood")) return "#0066cc";
@@ -47,6 +51,8 @@ async function loadDisasterData() {
     const url =
         `https://apps.kontur.io/events/v1/?feed=kontur-public` +
         `&limit=200&sortOrder=ASC&bbox=${bbox}`;
+
+    const KONTUR_API_TOKEN = await loadConfig();
 
     try {
         const resp = await fetch(url, {
