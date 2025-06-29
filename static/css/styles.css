@@ -1,4 +1,4 @@
-* {
+*{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -265,9 +265,6 @@ body {
 
   #map {
     height: 500px;
-  }
-
-  .friends-container {
   }
 
   .friend-info {
