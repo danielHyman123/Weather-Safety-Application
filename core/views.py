@@ -5,6 +5,8 @@ from .serializer import FriendSerializer, PlaceSerializer
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.shortcuts import get_object_or_404
 import json
 
 class FriendList(generics.ListAPIView):
@@ -29,3 +31,16 @@ def add_friend(request):
             return JsonResponse({'status': 'success', 'id': friend.id})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_friend(request, friend_id):
+    try:
+        friend = Friend.objects.get(id=friend_id)
+        friend.delete()
+        return JsonResponse({'status': 'deleted'})
+    except Friend.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Friend not found'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
