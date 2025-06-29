@@ -21,3 +21,25 @@ for (let i = 0; i < friends.length; i++) {
 function goToFriend(event, mapInstance, lat, lng) {
     mapInstance.setView([lat, lng], 15);
 }
+
+
+function addFriend() {
+    const name = document.getElementById('name').value;
+    const friends = document.getElementById('category').value;
+
+    // fetch('/add-friend/', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify({ name, friends })
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //     if (data.status === 'success') {
+    //         alert('Friend added with ID: ' + data.id);
+    //     } else {
+    //         alert('Failed to add friend');
+    //     }
+    // });
+}

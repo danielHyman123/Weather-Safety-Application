@@ -17,9 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from pages.views import home_view
+from core.views import add_friend, FriendList, PlaceList
+
+admin.site.site_header = "Weather Safety Admin"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_view, name='home'),
+    path('add-friend/', add_friend, name='add_friend'),
+
     path('api/', include('core.urls')),
 ]
