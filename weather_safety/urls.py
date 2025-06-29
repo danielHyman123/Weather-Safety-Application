@@ -25,6 +25,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_view, name='home'),
     path('add-friend/', add_friend, name='add_friend'),
-
     path('api/', include('core.urls')),
 ]
