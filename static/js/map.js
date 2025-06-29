@@ -1,15 +1,9 @@
-// Fetch the config file
-async function loadConfig() {
-    const response = await fetch('/static/js/config.json');
-    const config = await response.json();
-    return config.KONTUR_API_TOKEN;
-}
-
-/* ─────────────────────────
-   1. Map boot‑strap
-   ───────────────────────── */
+// initialize map
 const map = L.map("map").setView([40, 0], 2);      // world view
+let spaceStationMarker; // variable to hold space station marker
 
+updateSpaceStationMarker();
+setInterval(updateSpaceStationMarker, 5000);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution:
@@ -76,7 +70,8 @@ function processDisasterEvents(events) {
     events.forEach(evt => {
         const color = getDisasterColor(evt.type);
         let layer = null;
-
+        console.log(evt);
+        
         /*  A.  Prefer full geometry collection if present */
         if (evt.geometries &&
             evt.geometries.type === "FeatureCollection" &&
@@ -182,4 +177,46 @@ function goToFriend(event, mapInstance, lat, lng) {
 function addFriend() {
     const name = document.getElementById('name').value;
     const friends = document.getElementById('category').value;
+}
+
+// Space station lat and long 
+async function getSpaceStationLocation() {
+    const url = "http://api.open-notify.org/iss-now.json";
+    try {
+        const resp = await fetch(url);
+        console.log("the response is", resp);
+        if (!resp.ok) throw new Error(`ISS API ${resp.status}`);
+        const events = await resp.json();           // <- array of event objects
+        return [events.iss_position.latitude, events.iss_position.longitude];
+    } catch (err) {
+        console.error(err);
+        return [0, 0];
+    }
+}
+
+async function updateSpaceStationMarker() {
+    const issLocation = await getSpaceStationLocation();
+    if (!spaceStationMarker) {
+        let myIcon = L.icon({
+            iconUrl: '/static/icon/space-station-icon.jpg',
+            iconSize: [30, 30],
+            iconAnchor: [20, 20]
+        })
+        spaceStationMarker = L.marker(issLocation, { icon: myIcon }).addTo(map);
+        spaceStationMarker.bindPopup("Space Station").openPopup();
+    } else {
+        spaceStationMarker.setLatLng(issLocation);
+    }
+}
+
+function goToSpaceStation() {
+    map.setView(spaceStationMarker.getLatLng(), 15);
+}
+
+
+// Fetch the config file
+async function loadConfig() {
+    const response = await fetch('/static/js/config.json');
+    const config = await response.json();
+    return config.KONTUR_API_TOKEN;
 }
