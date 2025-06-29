@@ -1,101 +1,3 @@
-/* * {
-  margin: 0;
-  padding: 0;
-}
-
-.header {
-  width: 100%;
-  background-color: #333;
-  color: white;
-  padding: 25px;
-  text-align: center;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  height: 100vh;
-}
-
-.content {
-  padding: 10px 20px 30px;
-  margin-top: 10px;
-  width: 100%;
-  justify-content: space-between;
-}
-*/
-/* #contact-List {
-  display: flex;
-  list-style-type: none;
-  padding: 0;
-} */
-
-/*
-.map-section {
-  width: 100%;
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #f0f0f0;
-  align-items: center;
-  text-align: center;
-}
-
-#map {
-  width: 100%;
-  height: 400px;
-}
-
-/* #friend-list {
-    margin-top: 20px;
-    width: 100vw;
-    height: 25%;
-    background-color: #333;
-    display: grid;
-    list-style-type: none;
-    padding: 5px;
-}
-
-.friend {
-    width: 100%;
-    height: 10%;
-    border: 1px solid black;
-    background-color: #333;
-    color: aliceblue;
-    padding: 5px;
-} 
-
-.friends-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(40, 40, 40, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 20px 16px 34px 16px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-.friend-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 8px;
-    border-radius: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    color : white;
-}
-
-.friend-info:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateY(-2px);
-} */
-
 * {
   margin: 0;
   padding: 0;
@@ -182,6 +84,7 @@ body {
 .map-section {
   width: 100%;
   margin: 20px 0;
+  margin-bottom: 150px;
   padding: 16px;
   background-color: #f0f0f0;
   border-radius: 12px;
@@ -206,20 +109,32 @@ body {
 }
 
 .friends-container {
+  /* Transform to left sidebar */
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
-  right: 0;
-  background: rgba(40, 40, 40, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 16px 12px 34px 12px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  overflow-x: auto;
-  gap: 8px;
+  bottom: 0;
+  right: auto;
+  width: 200px;
+  height: 100vh;
+
+  /* Change flex direction for vertical layout */
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  /* Update padding for vertical layout */
+  padding: 20px 16px;
+  gap: 12px;
+
+  /* Keep the blur effect but adjust border */
+  border-top: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+
+  /* Enable vertical scrolling if needed */
+  overflow-y: visible;
+  overflow-x: hidden;
+  z-index: 1000;
 }
 
 .friend-info {
@@ -353,12 +268,6 @@ body {
   }
 
   .friends-container {
-    justify-content: center;
-    gap: 20px;
-    max-width: 800px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 20px 20px 0 0;
   }
 
   .friend-info {
@@ -452,7 +361,145 @@ body {
   .friend-buttons button {
     margin: 5px 0;
     display: block;
+  }
 }
 
+/* LEFT SIDEBAR TRANSFORMATION */
+
+/* Remove bottom padding from body */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 0; /* Remove bottom padding */
 }
 
+/* Transform friends container to left sidebar */
+.friends-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px; /* Sidebar width */
+  background: rgba(40, 40, 40, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column; /* Stack vertically instead of horizontally */
+  align-items: stretch; /* Full width items */
+  overflow-y: auto; /* Allow scrolling if too many friends */
+  gap: 12px;
+  z-index: 1000;
+}
+
+/* Adjust friend info for vertical layout */
+.friend-info {
+  display: flex;
+  flex-direction: row; /* Horizontal layout for sidebar */
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 100%;
+  min-height: 50px;
+}
+
+.friend-info:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
+}
+
+.friend-info.active {
+  background: rgba(0, 122, 255, 0.15);
+  border: 1px solid rgba(0, 122, 255, 0.4);
+}
+
+.friend-name {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.friend-info.active .friend-name {
+  color: #64b5f6;
+}
+
+/* Adjust main content to account for sidebar */
+.header {
+  margin-left: 280px; /* Match sidebar width */
+  width: calc(100% - 280px);
+  background-color: #333;
+  color: white;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.content {
+  margin-left: 280px; /* Match sidebar width */
+  padding: 16px;
+  max-width: calc(1200px - 280px);
+  margin-right: auto;
+}
+
+/* Mobile: Keep bottom bar on small screens */
+@media (max-width: 768px) {
+  .friends-container {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 16px 12px 34px 12px;
+    border-right: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .friend-info {
+    flex-direction: column;
+    min-width: 60px;
+    flex-shrink: 0;
+    padding: 8px;
+    min-height: auto;
+  }
+
+  .friend-name {
+    font-size: 11px;
+    text-align: center;
+    max-width: 60px;
+  }
+
+  .friend-info:hover {
+    transform: translateY(-2px);
+  }
+
+  .header {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .content {
+    margin-left: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  body {
+    padding-bottom: 120px; /* Restore bottom padding for mobile */
+  }
+}
