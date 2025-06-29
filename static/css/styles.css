@@ -448,4 +448,11 @@ body {
   .friends-container {
     padding: 12px 8px 20px 8px;
   }
+
+  .friend-buttons button {
+    margin: 5px 0;
+    display: block;
 }
+
+}
+
