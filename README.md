@@ -1,6 +1,6 @@
 # 🌪️ Weather Safety Application
 
-A full-stack Django web application that allows users to track their friends' locations in real-time and alerts them if those friends are within or near current disaster zones. This project uses the **Kontur Disaster API** for live hazard data and **Leaflet.js** for interactive mapping.
+A full-stack **Django** web application that allows users to track their friends' locations in real-time and alerts them if those friends are within or near current disaster zones. This project uses the **Kontur Disaster API** for live hazard data and **Leaflet.js** for interactive mapping.
 
 ---
 
