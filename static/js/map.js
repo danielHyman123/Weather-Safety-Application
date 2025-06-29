@@ -36,9 +36,63 @@ function formatDate(iso) {
     const d = new Date(iso);
     return isNaN(d) ? "—" : d.toLocaleString();
 }
+/* ─────────────────────────
+   4.  Demo fallback / testing
+   ───────────────────────── */
+function showSampleData() {
+    processDisasterEvents([
+        {
+            name: "Sample Earthquake",
+            type: "EARTHQUAKE",
+            severity: "SEVERE",
+            startedAt: "2025-01-15T04:00:00Z",
+            centroid: [-122.4194, 37.7749],
+            geometries: null,
+            description: "Sample quake for offline demo"
+        }
+    ]);
+}
 
 /* ─────────────────────────
-   3. Core fetch & render
+   5.  Event hooks
+   ───────────────────────── */
+
+// Handle existing friends from Django template
+let friends = document.getElementsByClassName('friend-name');
+for (let i = 0; i < friends.length; i++) {
+    let friend = friends[i];
+    L.marker([friend.dataset.lat, friend.dataset.lng]).addTo(map)
+        .bindPopup(friend.innerHTML)
+        .openPopup();
+    friend.addEventListener('click', (event) => {
+        goToFriend(event, map, friend.dataset.lat, friend.dataset.lng);
+    });
+}
+
+// Function to zoom to location
+function goToFriend(event, mapInstance, lat, lng) {
+    mapInstance.setView([lat, lng], 15);
+}
+
+
+function addFriend() {
+    const name = document.getElementById('name').value;
+    const friends = document.getElementById('category').value;
+}
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+/* ─────────────────────────
+   Fixed Core fetch & render with proper timing
    ───────────────────────── */
 async function loadDisasterData() {
     console.log("Loading disaster data…");
@@ -52,19 +106,30 @@ async function loadDisasterData() {
         `https://apps.kontur.io/events/v1/?feed=kontur-public` +
         `&limit=200&sortOrder=ASC&bbox=${bbox}`;
 
-        //Load Kontur API for Disaster data
-    const KONTUR_API_TOKEN = await loadConfig();
-
     try {
+        //Load Kontur API for Disaster data
+        const KONTUR_API_TOKEN = await loadConfig();
+
         const resp = await fetch(url, {
             headers: { Authorization: `Bearer ${KONTUR_API_TOKEN}` }
         });
+
         if (!resp.ok) throw new Error(`Kontur API ${resp.status}`);
-        const events = await resp.json();           // <- array of event objects
-        processDisasterEvents(Array.isArray(events) ? events : events.data);
+
+        const events = await resp.json();
+        const eventArray = Array.isArray(events) ? events : events.data;
+
+        console.log(`API returned ${eventArray ? eventArray.length : 0} events`);
+
+        processDisasterEvents(eventArray);
+
+        // Return success status for chaining
+        return { success: true, eventCount: eventArray ? eventArray.length : 0 };
+
     } catch (err) {
-        console.error(err);
-        showSampleData();     // graceful fallback
+        console.error("API failed, showing sample data:", err);
+        showSampleData();
+        return { success: false, error: err.message };
     }
 }
 
@@ -74,7 +139,9 @@ function processDisasterEvents(events) {
         return;
     }
 
-    events.forEach(evt => {
+    console.log(`Processing ${events.length} disaster events`);
+
+    events.forEach((evt, index) => {
         const color = getDisasterColor(evt.type);
         let layer = null;
 
@@ -102,6 +169,7 @@ function processDisasterEvents(events) {
 
             /*  B.  Fallback: draw a single point at centroid */
         } else if (Array.isArray(evt.centroid) && evt.centroid.length === 2) {
+            // Note: Kontur API typically returns [lng, lat], so we swap for Leaflet [lat, lng]
             layer = L.circleMarker([evt.centroid[1], evt.centroid[0]], {
                 radius: 8,
                 color,
@@ -111,7 +179,10 @@ function processDisasterEvents(events) {
             });
         }
 
-        if (!layer) return; // nothing drawable
+        if (!layer) {
+            console.log(`Could not create layer for event ${index}:`, evt);
+            return;
+        }
 
         /* Popup with key event data */
         const popup = `
@@ -129,131 +200,84 @@ function processDisasterEvents(events) {
         disasterLayer.addLayer(layer);
     });
 
-    console.log(`Rendered ${disasterLayer.getLayers().length} geometries`);
+    console.log(`Successfully rendered ${disasterLayer.getLayers().length} disaster layers`);
 }
 
-/* ─────────────────────────
-   4.  Demo fallback / testing
-   ───────────────────────── */
-function showSampleData() {
-    processDisasterEvents([
-        {
-            name: "Sample Earthquake",
-            type: "EARTHQUAKE",
-            severity: "SEVERE",
-            startedAt: "2025-01-15T04:00:00Z",
-            centroid: [-122.4194, 37.7749],
-            geometries: null,
-            description: "Sample quake for offline demo"
-        }
-    ]);
+// Fixed timing for initial load
+async function initializeMapWithData() {
+    console.log("Initializing map with disaster data...");
+
+    try {
+        const result = await loadDisasterData();
+        console.log("Disaster data loaded:", result);
+
+        // Only check proximity after disasters are loaded
+        setTimeout(() => {
+            console.log("Running proximity check after disaster data loaded");
+            checkFriendDisasterProximity();
+        }, 500); // Small delay to ensure layers are fully added
+
+    } catch (error) {
+        console.error("Failed to initialize map data:", error);
+    }
 }
 
-/* ─────────────────────────
-   5.  Event hooks
-   ───────────────────────── */
-map.whenReady(() =>{
-    loadDisasterData();
-    checkFriendDisasterProximity();
+// Fixed event hooks with proper async handling
+map.whenReady(() => {
+    console.log("Map is ready, initializing data...");
+    initializeMapWithData();
 });
 
 let debounce;
 map.on("moveend", () => {
     clearTimeout(debounce);
-    debounce = setTimeout(() => {
+    debounce = setTimeout(async () => {
         if (map.getZoom() >= 4) {
-            loadDisasterData(); 
-            checkFriendDisasterProximity();
+            console.log("Map moved, reloading data...");
+            try {
+                await loadDisasterData();
+                // Check proximity after data reloads
+                setTimeout(() => {
+                    checkFriendDisasterProximity();
+                }, 500);
+            } catch (error) {
+                console.error("Error reloading data on map move:", error);
+            }
         }
     }, 400);
 });
 
-// Handle existing friends from Django template
-let friends = document.getElementsByClassName('friend-name');
-for (let i = 0; i < friends.length; i++) {
-    let friend = friends[i];
-    L.marker([friend.dataset.lat, friend.dataset.lng]).addTo(map)
-        .bindPopup(friend.innerHTML)
-        .openPopup();
-    friend.addEventListener('click', (event) => {
-        goToFriend(event, map, friend.dataset.lat, friend.dataset.lng);
-    });
-}
+// Enhanced debugging function
+function debugDisasterLayers() {
+    console.log("=== DISASTER LAYER DEBUG ===");
+    console.log(`Total layers in disasterLayer: ${disasterLayer.getLayers().length}`);
 
-// Function to zoom to location
-function goToFriend(event, mapInstance, lat, lng) {
-    mapInstance.setView([lat, lng], 15);
-}
-
-
-function addFriend() {
-    const name = document.getElementById('name').value;
-    const friends = document.getElementById('category').value;
-}
-
-async function checkFriendDisasterProximity() {
-
-    async function checkFriendDisasterProximity() {
-    console.log("Checking friend-disaster proximity...");
-    const proximityRadiusKm = 20; // Adjustable radius in kilometers
-
-    // Helper: Calculate distance between two lat/lng points (Haversine formula)
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Earth radius in km
-        const toRad = x => x * Math.PI / 180;
-
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-    }
-
-    try {
-        // Method 1: Using Django API endpoint (recommended)
-        const response = await fetch('/api/check-friend-disasters/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken() // You'll need this function
-            },
-            body: JSON.stringify({
-                disasters: getCurrentDisasterData(),
-                proximity_radius: proximityRadiusKm
-            })
+    disasterLayer.getLayers().forEach((layer, index) => {
+        console.log(`Layer ${index}:`, {
+            type: layer.constructor.name,
+            hasGetBounds: typeof layer.getBounds === 'function',
+            hasGetLatLng: typeof layer.getLatLng === 'function',
+            bounds: layer.getBounds ? layer.getBounds() : null,
+            latlng: layer.getLatLng ? layer.getLatLng() : null,
+            popup: layer.getPopup() ? layer.getPopup().getContent().substring(0, 100) : 'No popup'
         });
+    });
 
-        if (response.ok) {
-            const data = await response.json();
-            handleProximityAlerts(data.affected_friends);
-        } else {
-            // Fallback to client-side checking
-            clientSideProximityCheck();
-        }
-    } catch (error) {
-        console.error('Error with Django API, falling back to client-side check:', error);
-        // Fallback to client-side checking
-        clientSideProximityCheck();
-    }
+    console.log("=== END DEBUG ===");
 }
 
-// Client-side proximity checking (fallback)
-function clientSideProximityCheck() {
+// Test function to manually trigger proximity check
+function testProximityCheck() {
+    console.log("=== MANUAL PROXIMITY TEST ===");
+    debugDisasterLayers();
+    checkFriendDisasterProximity();
+}
+
+function checkFriendDisasterProximity() {
+    console.log("=== PROXIMITY CHECK START ===");
+    console.log("Checking friend-disaster proximity...");
+
     const proximityRadiusKm = 20;
-    
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const toRad = x => x * Math.PI / 180;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-    }
 
     // Get friends from DOM elements
     const friendElements = document.getElementsByClassName('friend-name');
@@ -263,34 +287,56 @@ function clientSideProximityCheck() {
         lng: parseFloat(f.dataset.lng)
     })).filter(f => !isNaN(f.lat) && !isNaN(f.lng));
 
+    console.log(`Found ${friends.length} friends with valid coordinates:`, friends);
+
     if (friends.length === 0) {
         console.log('No friends with valid coordinates found');
         return;
     }
 
     const disasterLayers = disasterLayer.getLayers();
+    console.log(`Found ${disasterLayers.length} disaster layers`);
+
+    // Debug disaster layers
+    disasterLayers.forEach((layer, index) => {
+        let center = null;
+        if (layer.getBounds) {
+            center = layer.getBounds().getCenter();
+        } else if (layer.getLatLng) {
+            center = layer.getLatLng();
+        }
+        console.log(`Disaster ${index}:`, {
+            center: center,
+            type: layer.constructor.name,
+            popup: layer.getPopup() ? 'Has popup' : 'No popup'
+        });
+    });
+
+    if (disasterLayers.length === 0) {
+        console.log('⚠️ No disaster layers found! This might be why proximity check shows 0 disasters.');
+        console.log('Try running testProximityCheck() in console after disasters load');
+        return;
+    }
+
     const affectedFriends = [];
 
     friends.forEach(friend => {
+        console.log(`Checking friend: ${friend.name} at [${friend.lat}, ${friend.lng}]`);
         let isAffected = false;
-        
+
         for (let layer of disasterLayers) {
-            if (isAffected) break; // One alert per friend
-            
+            if (isAffected) break;
+
             let disasterCenter;
             let disasterType = 'Unknown';
 
-            // Extract disaster center coordinates
             if (layer.getBounds) {
-                // GeoJSON layer with bounds
                 disasterCenter = layer.getBounds().getCenter();
             } else if (layer.getLatLng) {
-                // CircleMarker layer
                 disasterCenter = layer.getLatLng();
             }
 
-            // Try to extract disaster type from popup content
-            if (layer.getPopup && layer.getPopup()) {
+            if (layer.getPopup()) {
                 const popupContent = layer.getPopup().getContent();
                 const typeMatch = popupContent.match(/<b>Type:<\/b>\s*([^<\n]+)/);
                 if (typeMatch) {
@@ -300,238 +346,96 @@ function clientSideProximityCheck() {
 
             if (disasterCenter) {
                 const distance = haversineDistance(
-                    friend.lat, friend.lng, 
+                    friend.lat, friend.lng,
                     disasterCenter.lat, disasterCenter.lng
                 );
-                
+
+                console.log(`Distance from ${friend.name} to ${disasterType}: ${distance.toFixed(2)}km`);
+
                 if (distance <= proximityRadiusKm) {
                     affectedFriends.push({
                         name: friend.name,
                         hazard: disasterType,
-                        distance: Math.round(distance * 10) / 10, // Round to 1 decimal
+                        distance: Math.round(distance * 10) / 10,
                         coordinates: {
                             lat: friend.lat,
                             lng: friend.lng
                         }
                     });
                     isAffected = true;
+                    console.log(`⚠️ ${friend.name} is affected by ${disasterType}!`);
                 }
+            } else {
+                console.log('Could not determine disaster center for layer');
             }
         }
     });
 
-    handleProximityAlerts(affectedFriends);
+    console.log(`=== PROXIMITY CHECK COMPLETE ===`);
+    console.log(`Affected friends: ${affectedFriends.length}`);
+
+    if (affectedFriends.length > 0) {
+        handleProximityAlerts(affectedFriends);
+    } else {
+        console.log('No friends are currently near disaster zones.');
+    }
 }
 
-// Handle proximity alerts
+// Enhanced alert handling
 function handleProximityAlerts(affectedFriends) {
     if (!affectedFriends || affectedFriends.length === 0) {
-        console.log('No friends affected by current disasters.');
         return;
     }
 
-    // Show alerts
+    console.log(`Found ${affectedFriends.length} affected friends`);
+
+    // Show individual alerts
     affectedFriends.forEach(friend => {
         const message = `⚠️ ${friend.name} is ${friend.distance}km from a ${friend.hazard.toUpperCase()} zone!`;
         alert(message);
         console.log(message);
-        
-        // Optional: Highlight the friend's marker on map
+
+        // Highlight the friend's marker on map
         highlightFriendMarker(friend);
     });
 
-    // Optional: Show summary notification
+    // Show summary notification for multiple friends
     if (affectedFriends.length > 1) {
         const summaryMessage = `⚠️ WARNING: ${affectedFriends.length} friends are near disaster zones!`;
         console.log(summaryMessage);
-        
-        // You could also show this in a more sophisticated way
         showNotification(summaryMessage, 'warning');
     }
 }
 
-// Helper function to get current disaster data for API
-function getCurrentDisasterData() {
-    const disasters = [];
-    const disasterLayers = disasterLayer.getLayers();
-    
-    disasterLayers.forEach(layer => {
-        let center, type = 'Unknown';
-        
-        if (layer.getBounds) {
-            center = layer.getBounds().getCenter();
-        } else if (layer.getLatLng) {
-            center = layer.getLatLng();
-        }
-        
-        // Extract type from popup if available
-        if (layer.getPopup && layer.getPopup()) {
-            const popupContent = layer.getPopup().getContent();
-            const typeMatch = popupContent.match(/<b>Type:<\/b>\s*([^<\n]+)/);
-            if (typeMatch) {
-                type = typeMatch[1].trim();
-            }
-        }
-        
-        if (center) {
-            disasters.push({
-                lat: center.lat,
-                lng: center.lng,
-                type: type
-            });
-        }
-    });
-    
-    return disasters;
-}
-
-// Helper function to get CSRF token for Django
-function getCsrfToken() {
-    const cookieValue = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('csrftoken='))
-        ?.split('=')[1];
-    
-    if (cookieValue) {
-        return cookieValue;
-    }
-    
-    // Fallback: try to get from meta tag
-    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-    return csrfMeta ? csrfMeta.getAttribute('content') : '';
-}
-
-// Optional: Highlight friend marker when they're in danger
+// Improved friend marker highlighting
 function highlightFriendMarker(friend) {
-    // Find and highlight the friend's marker
     map.eachLayer(layer => {
         if (layer instanceof L.Marker) {
             const popup = layer.getPopup();
             if (popup && popup.getContent().includes(friend.name)) {
-                // Add pulsing effect or change color
-                layer.setIcon(L.divIcon({
+                // Create a pulsing danger icon
+                const dangerIcon = L.divIcon({
                     className: 'danger-friend-marker',
-                    html: '⚠️',
-                    iconSize: [20, 20]
-                }));
+                    html: '<div style="background-color: red; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 16px; animation: pulse 2s infinite;">⚠️</div>',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+                layer.setIcon(dangerIcon);
+
+                // Add CSS for pulsing animation if not already added
+                if (!document.getElementById('danger-marker-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'danger-marker-styles';
+                    style.textContent = `
+                        @keyframes pulse {
+                            0% { transform: scale(1); opacity: 1; }
+                            50% { transform: scale(1.2); opacity: 0.7; }
+                            100% { transform: scale(1); opacity: 1; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
             }
         }
     });
 }
-
-// Optional: Show notification (you can customize this)
-function showNotification(message, type = 'info') {
-    // Create a simple notification div
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px;
-        background: ${type === 'warning' ? '#ff6b35' : '#007bff'};
-        color: white;
-        border-radius: 5px;
-        z-index: 10000;
-        max-width: 300px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    // Remove after 5 seconds
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
-}
-
-// Enhanced version that checks periodically
-function startPeriodicProximityCheck(intervalMinutes = 5) {
-        // Check immediately
-        checkFriendDisasterProximity();
-    
-        // Then check every N minutes
-        const intervalMs = intervalMinutes * 60 * 1000;
-        setInterval(() => {
-            console.log('Performing periodic proximity check...');
-            checkFriendDisasterProximity();
-        }, intervalMs);
-    }
-}
-
-
-
-
-//     console.log("Checking friend-disaster proximity...");
-//     const proximityRadiusKm = 20; // You can adjust this as needed
-
-//     // Helper: Calculate distance between two lat/lng points (Haversine formula)
-//     function haversineDistance(lat1, lon1, lat2, lon2) {
-//         const R = 6371; // Earth radius in km
-//         const toRad = x => x * Math.PI / 180;
-
-//         const dLat = toRad(lat2 - lat1);
-//         const dLon = toRad(lon2 - lon1);
-//         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-//                   Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-//                   Math.sin(dLon / 2) * Math.sin(dLon / 2);
-//         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//         return R * c;
-//     }
-
-//     const friendElements = document.getElementsByClassName('friend-name');
-//     const friends = Array.from(friendElements).map(f => ({
-//         name: f.innerText,
-//         lat: parseFloat(f.dataset.lat),
-//         lng: parseFloat(f.dataset.lng)
-//     }));
-
-//     const disasterLayers = disasterLayer.getLayers();
-//     console.log('about to loop');
-//     friends.forEach(friend => {
-//         console.log('looping through friends');
-//         for (let layer of disasterLayers) {
-//             console.log('for layer of disaster');
-
-            
-//             let center;
-
-//             // Case A: GeoJSON with features
-//             if (layer.getBounds) {
-//                 center = layer.getBounds().getCenter();
-//             }
-//             // Case B: Simple CircleMarker (centroid-based)
-//             else if (layer.getLatLng) {
-//                 center = layer.getLatLng();
-//             }
-
-//             if (center) {
-//                 console.log('if center');
-//                 const dist = haversineDistance(friend.lat, friend.lng, center.lat, center.lng);
-//                 if (dist <= proximityRadiusKm) {
-//                     alert(`⚠️ ${friend.name} is within ${proximityRadiusKm}km of a disaster zone!`);
-//                     break; // one alert per friend
-//                 }
-//             }
-//         }
-//     });
-// }
-
-
-// //     try {
-// //         const res = await fetch('/api/disasters/');
-// //         const data = await res.json();
-
-// //         if (data.status === 'success' && data.affected_friends.length > 0) {
-// //             data.affected_friends.forEach(friend => {
-// //                 alert(`⚠️ Friend "${friend.name}" is in a ${friend.hazard.toUpperCase()} zone!`);
-// //                 console.log(`⚠️ Friend "${friend.name}" is in a ${friend.hazard.toUpperCase()} zone!`);
-
-// //             });
-// //         } else {
-// //             console.log('No friends affected by current disasters.');
-// //         }
-// //     } catch (error) {
-// //         console.error('Error checking disaster proximity:', error);
-// //     }
- 

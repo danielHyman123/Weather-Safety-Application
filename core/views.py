@@ -9,8 +9,6 @@ from django.views.decorators.http import require_http_methods
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 
-
-from shapely.geometry import shape, Point
 import json, requests, os, math
 
 class FriendList(generics.ListAPIView):
