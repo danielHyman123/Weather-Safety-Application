@@ -70,8 +70,7 @@ function processDisasterEvents(events) {
     events.forEach(evt => {
         const color = getDisasterColor(evt.type);
         let layer = null;
-        console.log(evt);
-        
+
         /*  A.  Prefer full geometry collection if present */
         if (evt.geometries &&
             evt.geometries.type === "FeatureCollection" &&
@@ -184,7 +183,6 @@ async function getSpaceStationLocation() {
     const url = "http://api.open-notify.org/iss-now.json";
     try {
         const resp = await fetch(url);
-        console.log("the response is", resp);
         if (!resp.ok) throw new Error(`ISS API ${resp.status}`);
         const events = await resp.json();           // <- array of event objects
         return [events.iss_position.latitude, events.iss_position.longitude];
@@ -198,7 +196,7 @@ async function updateSpaceStationMarker() {
     const issLocation = await getSpaceStationLocation();
     if (!spaceStationMarker) {
         let myIcon = L.icon({
-            iconUrl: '/static/icon/space-station-icon.jpg',
+            iconUrl: '/static/icon/space-station-icon-removebg-preview.png',
             iconSize: [30, 30],
             iconAnchor: [20, 20]
         })
