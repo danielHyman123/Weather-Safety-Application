@@ -2,6 +2,8 @@
 
 A full-stack **Django** web application that allows users to track their friends' locations in real-time and alerts them if those friends are within or near current disaster zones. This project uses the **Kontur Disaster API** for live hazard data and **Leaflet.js** for interactive mapping.
 
+[Video Demo](https://www.youtube.com/watch?v=bqQsm49eXjg)
+
 ---
 
 ## 🧭 Overview
